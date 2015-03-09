@@ -17,9 +17,23 @@ fi
 echo 开始上传。。。
 fn=`echo $2 |xxd -plain | sed 's/\(..\)/%\1/g'`
 dir=`echo $3 |xxd -plain | sed 's/\(..\)/%\1/g'`
+
+#update Mon Mar  9 19:12:56 CST 2015 判断目录
+if [ `echo $3|rev|cut -c1` != '/' ]
+then
+	fn=$dir
+	dir="%2F"
+fi
+
 ret=`curl -F file=@$2 "https://c.pcs.baidu.com/rest/2.0/pcs/file?method=upload&app_id=250528&ondup=newcopy&dir=$dir&filename=$fn&BDUSS=$BDUSS"`
 md5=`echo $ret|pcregrep -o1 'md5":"(.*?)"'`
 mymd5=`md5sum $2|cut -f1 -d " "`
+#苹果操作系统下。用md5命令
+if [ `uname` = "Darwin" ]
+then
+mymd5=`md5 -q $2`
+fi
+
 echo
 echo 输入的文件的md5: $mymd5;
 echo 服务器返回的md5: $md5;
